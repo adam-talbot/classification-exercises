@@ -1,77 +1,96 @@
+
 import pandas as pd
 import numpy as np
 import os
 from env import host, user, password
 
-# 1. Make a function named get_titanic_data that returns the titanic data from the codeup data science database as a pandas data frame. 
-# Obtain your data from the Codeup Data Science Database.
+###################### Acquire Titanic Data ######################
 
-# def get_titanic_data():
-#     from env import host, user, password # not sure if I should do this inside the function or outside
-#     db = 'titanic_db'
-#     url = f'mysql+pymysql://{user}:{password}@{host}/titanic_db'
-#     query = '''
-#     select * from passengers;
-#     '''
-#     df = pd.read_sql(query, url)
-#     return df
+def get_connection(db, user=user, host=host, password=password):
+    '''
+    This function uses my info from my env file to
+    create a connection url to access the Codeup db.
+    It takes in a string name of a database as an argument.
+    '''
+    return f'mysql+pymysql://{user}:{password}@{host}/{db}'
+    
+    
+    
+def new_titanic_data():
+    '''
+    This function reads the titanic data from the Codeup db into a df,
+    write it to a csv file, and returns the df.
+    '''
+    # Create SQL query.
+    sql_query = 'SELECT * FROM passengers'
+    
+    # Read in DataFrame from Codeup db.
+    df = pd.read_sql(sql_query, get_connection('titanic_db'))
+    
+    return df
 
-# 2. Make a function named get_iris_data that returns the data from the iris_db on the codeup data science database as a pandas data frame. 
-# The returned data frame should include the actual name of the species in addition to the species_ids. Obtain your data from the Codeup Data Science Database.
 
-# def get_iris_data():
-#     from env import host, user, password # not sure if I should do this inside the function or outside
-#     url = f'mysql+pymysql://{user}:{password}@{host}/iris_db'
-#     query = '''
-#     select * from measurements
-#     join species using(species_id);
-#     '''
-#     df = pd.read_sql(query, url)
-#     return df
-
-# 3. Once you've got your get_titanic_data and get_iris_data functions written, now it's time to add caching to them. To do this, edit the beginning of the function to check for a local filename like titanic.csv or iris.csv. If they exist, use the .csv file. If the file doesn't exist, then produce the SQL and pandas necessary to create a dataframe, then write the dataframe to a .csv file with the appropriate name.
 
 def get_titanic_data():
-    
-    filename = "titanic.csv"
-
-    if os.path.isfile(filename):
-        return pd.read_csv(filename)
-    
+    '''
+    This function reads in titanic data from Codeup database, writes data to
+    a csv file if a local file does not exist, and returns a df.
+    '''
+    if os.path.isfile('titanic_df.csv'):
+        
+        # If csv file exists, read in data from csv file.
+        df = pd.read_csv('titanic_df.csv', index_col=0)
+        
     else:
-        # read the SQL query into a dataframe
-        url = f'mysql+pymysql://{user}:{password}@{host}/titanic_db'
-        query = '''
-        select * from passengers;
-        '''
-        df = pd.read_sql(query, url)
+        
+        # Read fresh data from db into a DataFrame.
+        df = new_titanic_data()
+        
+        # Write DataFrame to a csv file.
+        df.to_csv('titanic_df.csv')
+        
+    return df
 
-        # Write that dataframe to disk for later. Called "caching" the data for later.
-        df.to_csv(filename)
+###################### Acquire Iris Data ######################
 
-        # Return the dataframe to the calling code
-        return df  
+def new_iris_data():
+    '''
+    This function reads the iris data from the Codeup db into a df.
+    '''
+    sql_query = """
+                SELECT 
+                    species_id,
+                    species_name,
+                    sepal_length,
+                    sepal_width,
+                    petal_length,
+                    petal_width
+                FROM measurements
+                JOIN species USING(species_id)
+                """
     
+    # Read in DataFrame from Codeup db.
+    df = pd.read_sql(sql_query, get_connection('iris_db'))
     
-    
+    return df
+
+
 def get_iris_data():
-    
-    filename = "iris.csv"
-
-    if os.path.isfile(filename):
-        return pd.read_csv(filename)
-    
+    '''
+    This function reads in iris data from Codeup database, writes data to
+    a csv file if a local file does not exist, and returns a df.
+    '''
+    if os.path.isfile('iris_df.csv'):
+        
+        # If csv file exists read in data from csv file.
+        df = pd.read_csv('iris_df.csv', index_col=0)
+        
     else:
-        # read the SQL query into a dataframe
-        url = f'mysql+pymysql://{user}:{password}@{host}/iris_db'
-        query = '''
-        select * from measurements
-        join species using(species_id);
-        '''
-        df = pd.read_sql(query, url)
-
-        # Write that dataframe to disk for later. Called "caching" the data for later.
-        df.to_csv(filename)
-
-        # Return the dataframe to the calling code
-        return df  
+        
+        # Read fresh data from db into a DataFrame
+        df = new_iris_data()
+        
+        # Cache data
+        df.to_csv('iris_df.csv')
+        
+    return df
