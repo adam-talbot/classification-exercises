@@ -1,3 +1,8 @@
+import pandas as pd
+import numpy as np
+import os
+from env import host, user, password
+
 # 1. Make a function named get_titanic_data that returns the titanic data from the codeup data science database as a pandas data frame. 
 # Obtain your data from the Codeup Data Science Database.
 
@@ -26,16 +31,15 @@
 
 # 3. Once you've got your get_titanic_data and get_iris_data functions written, now it's time to add caching to them. To do this, edit the beginning of the function to check for a local filename like titanic.csv or iris.csv. If they exist, use the .csv file. If the file doesn't exist, then produce the SQL and pandas necessary to create a dataframe, then write the dataframe to a .csv file with the appropriate name.
 
-import os
-
 def get_titanic_data():
+    
     filename = "titanic.csv"
 
     if os.path.isfile(filename):
         return pd.read_csv(filename)
+    
     else:
         # read the SQL query into a dataframe
-        from env import host, user, password
         url = f'mysql+pymysql://{user}:{password}@{host}/titanic_db'
         query = '''
         select * from passengers;
@@ -51,13 +55,14 @@ def get_titanic_data():
     
     
 def get_iris_data():
+    
     filename = "iris.csv"
 
     if os.path.isfile(filename):
         return pd.read_csv(filename)
+    
     else:
         # read the SQL query into a dataframe
-        from env import host, user, password # not sure if I should do this inside the function or outside
         url = f'mysql+pymysql://{user}:{password}@{host}/iris_db'
         query = '''
         select * from measurements
