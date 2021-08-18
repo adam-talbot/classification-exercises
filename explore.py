@@ -1,3 +1,8 @@
+# ideas to improve
+# add plt.tight_layout() where necessary to make sure axis labels don't overlap
+# Make it work on datasets with datasets with only one categorical variable
+# Make it work on datasets with a tr
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -62,6 +67,7 @@ def explore_univariate_categorical(train, cat_var):
     plt.figure(figsize=(2,2))
     sns.barplot(x=cat_var, y='Count', data=frequency_table, color='lightseagreen')
     plt.title(cat_var)
+    plt.tight_layout() # I added this
     plt.show()
     print(frequency_table)
 
